@@ -49,6 +49,7 @@ import torch
 from torchtext import models
 dir(models)
 
+
  'FLAN_T5_BASE',
  'FLAN_T5_BASE_ENCODER',
  'ROBERTA_BASE_ENCODER',
@@ -60,10 +61,12 @@ dir(models)
  'XLMR_LARGE_ENCODER',
 
 
+
 ```
 import torch
 from torchvision import models
 dir(models)
+
 
  'AlexNet',
  'AlexNet_Weights',
@@ -79,3 +82,35 @@ dir(models)
  'shufflenet_v2_x0_5',
  'vgg16',
  'vit_b_32'
+
+
+# Which pre-trained models to use 
+
+It depends on our problem or the device we are working with. Generally higher suffix numbers in the model name for example, efficientnet_b0() --> efficientnet_b1() --> efficientnet_b7()), means better performance but a larger model. We might think better performance is always better, that is true but some better performing models are too big for some devices. For example, say we would like to run our model on a mobile-device, we'll have to take into account the limited compute resources on the device, thus we would be looking for a smaller model. But if we've got unlimited compute power, we'd likely take the biggest.
+
+# Setting up a pre-trained model
+
+The pre-trained model we're going to be using is from torchvision.models.
+ 
+* The old way(the depreciated one) of using a pre-trained model :- 
+    `torchvision.models.efficientnet_b0(pretrained  = True)`
+
+* The new way of using a pre-trained model :- 
+    weights = 'torchvision.models.Efficient_B0_Weights.DEFAULT'
+    torchvision.models.efficientnet_b0(weights = weights).to(device)
+
+# Efficient Network Architecture
+```import torch
+   import torchvision
+
+    weights = torchvision.models.EfficientNet_B0_Weights.DEFAULT # DEFAULT means it's best available weights
+    model_efficientnet = torchvision.models.efficientnet_b0(weights  = weights ).to(torch.device("cuda"))
+    print(model_efficientnet)
+
+
+# The VGG16 Network Architecture
+```import torch
+   import torchvision
+
+    weights = torchvision.models.VGG16_Weights.DEFAULT
+    model = torchvision.models.vgg16(weights = weights).to(torch.device("cuda"))
