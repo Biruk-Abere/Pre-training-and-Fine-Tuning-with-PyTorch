@@ -296,6 +296,9 @@ Estimated Total Size (MB): 838.53
 ----------------------------------------------------------------
 ```
 
+The input size to the model remains the same as before, specified as 3 x 32 x 32, which suggests RGB images of 32x32 pixels. The output size, as indicated by the final layer shape [64, 1000], implies that for each image in a batch of 64, the model will output a vector of 1000 elements, where each element corresponds to a class score. The total parameters of the model are listed as 138,357,544. However, after the freezing process, all the parameters are listed as non-trainable, which is indicated by the number of trainable parameters being 0 and the non-trainable parameters being 138,357,544. This suggests that the weights of the network have been frozen and will not be updated during further training.
+
+
 ## Adjusting the output layer
 
 Let's now adjust the output layer or the classifier portion of our pre-trained model to our needs. Right now our pre-trained model has `out_features = 1000` because there are 1000 classes in the ImageNet. However we don't have 1000 classes , we only have let's say an out_features of 3 classes , tiger , misty and neither.. we can change the classifier portion of our model by creating a new series of layers. 
@@ -437,8 +440,14 @@ Estimated Total Size (MB): 822.46
 ----------------------------------------------------------------
 
 ```
+The model has been altered by adding a new classifier on top, which is a common technique when adapting pre-trained models for new tasks. The output layer of the model, which is the last linear layer (Linear-39), shows an output shape of [64, 3]. This implies that for each image in the input batch of 64, the model will produce a vector with 3 elements, likely corresponding to the number of new classes it has been adapted to predict.
+
+The total number of parameters in the model is 134,272,835. Out of these, 12,291 are trainable parameters, which means these can be updated during the training process. The vast majority of parameters, 134,260,544, are non-trainable parameters. This indicates that these parameters have been frozen and will remain unchanged during training, a technique that helps in transferring the learned features of the pre-existing VGG16 model to a new task without the need for extensive retraining.
+
 
 ## Training the weights of the last few layers 
+
+By keeping the initial layers unchanged, which have already learned general features from a larger dataset, and retraining only the final layers, the network can apply its broad knowledge to the nuances of the new data. This allows the model to maintain its learned patterns while adjusting its output to the requirements of the new problem, such as recognizing a different set of categories or working with a distinct type of data.
 
 ```python
 print(model_vgg.classifier[3:])
@@ -519,8 +528,13 @@ Params size (MB): 512.21
 Estimated Total Size (MB): 822.46
 ----------------------------------------------------------------
 ```
+The neural network model consists of 134,272,835 parameters in total. Of these, 16,793,603 parameters have been made adjustable by enabling training on the final layers, signifying recent modifications for task-specific optimization. The rest, amounting to 117,479,232 parameters, remain non-trainable, signifying that they are kept unchanged from the model's initial comprehensive training.
+
 
 ## Retrain the entire layer
+
+All layers of a pre-existing neural network model are updated during training. Initially, the model is loaded with weights obtained from training on a large dataset. These pre-trained weights serve as the starting point, or initialization, providing a knowledge base that the model can build upon. The model then undergoes further training with new data, allowing every layer's weights to be fine-tuned, optimizing the model's performance for a specific task or dataset. This approach is beneficial when you have sufficient data and computational resources to refine the entire network.
+
 
 ```python
 for params in model_vgg.parameters():
@@ -586,6 +600,8 @@ Params size (MB): 512.21
 Estimated Total Size (MB): 822.46
 ----------------------------------------------------------------
 ```
+The model has a total of 134,272,835 parameters. All of these parameters are listed as trainable, which means that during the retraining process, the weights of every layer in the model are being updated. This differs from typical transfer learning where only the last few layers are retrained and the rest are frozen (non-trainable) to preserve the knowledge they have captured. There are no non-trainable parameters, indicating a full model fine-tuning has been performed.
+
 
 ## Sample Image Classification using transfer learning
 ```python
