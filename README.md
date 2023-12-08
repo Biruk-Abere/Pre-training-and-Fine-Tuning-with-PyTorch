@@ -44,11 +44,13 @@ Finally, if we have a lot of data, one thing we might do is take this open sourc
 
 The whole idea of transfer learning is to take an already well-performing model on a problem space similar to ours then customizing it to our case. When we are working on computer vision and NLP problems, we can find pre-trained classification models in torchvision.models and torchtext.models.
  
-```
+```python
 import torch
 from torchtext import models
-dir(models)
+dir(models) 
 
+```
+Output:
 
  'FLAN_T5_BASE',
  'FLAN_T5_BASE_ENCODER',
@@ -62,12 +64,13 @@ dir(models)
 
 
 
-```
+```python
 import torch
 from torchvision import models
-dir(models)
+dir(models) 
 
-
+```
+Output:
  'AlexNet',
  'AlexNet_Weights',
  'ConvNeXt',
@@ -96,21 +99,211 @@ The pre-trained model we're going to be using is from torchvision.models.
     `torchvision.models.efficientnet_b0(pretrained  = True)`
 
 * The new way of using a pre-trained model :- 
-    weights = 'torchvision.models.Efficient_B0_Weights.DEFAULT'
-    torchvision.models.efficientnet_b0(weights = weights).to(device)
+    `weights = 'torchvision.models.Efficient_B0_Weights.DEFAULT`
+    `torchvision.models.efficientnet_b0(weights = weights).to(device)`
 
 # Efficient Network Architecture
-```import torch
-   import torchvision
+```python
+import torch
+import torchvision
 
-    weights = torchvision.models.EfficientNet_B0_Weights.DEFAULT # DEFAULT means it's best available weights
-    model_efficientnet = torchvision.models.efficientnet_b0(weights  = weights ).to(torch.device("cuda"))
-    print(model_efficientnet)
+weights = torchvision.models.EfficientNet_B0_Weights.DEFAULT  # DEFAULT means it's best available weights
+model_efficientnet = torchvision.models.efficientnet_b0(weights=weights).to(torch.device("cuda"))
+print(model_efficientnet)
+
+```
 
 
 # The VGG16 Network Architecture
-```import torch
-   import torchvision
+```python
+import torch
+import torchvision
+weights = torchvision.models.VGG16_Weights.DEFAULT
+model = torchvision.models.vgg16(weights = weights).to(torch.device("cuda"))
+```
 
-    weights = torchvision.models.VGG16_Weights.DEFAULT
-    model = torchvision.models.vgg16(weights = weights).to(torch.device("cuda"))
+# The AlexNet Architecture
+```python
+import torch
+import torchvision
+
+weights = torchvision.models.AlexNet_Weights.DEFAULT
+model_alexnet  = torchvision.models.alexnet(weights =  weights).to(torch.device("cuda"))
+```
+# The Resnet Architecture
+
+```python
+import torch
+import torchvision
+weights = torchvision.models.ResNet101_Weights.DEFAULT
+model_resnet = torchvision.models.resnet101(weights = weights).to(torch.device("cuda"))
+```
+# The GoogLNet Architecture
+
+```python 
+import torch
+import torchvision
+weights = torchvision.models.GoogLeNet_Weights.DEFAULT
+model_googLeNet = torchvision.models.googlenet(weights  = weights).to(torch.device("cuda"))
+```
+# The Vision Transformer
+
+```python
+import torch
+import torchvision
+model_vision_transformer = torchvision.models.VisionTransformer
+model_vision_transformer
+```
+
+
+# Freezing the base model and chaniging the output layer to suit our needs
+
+The process of transfer learning usually goes: freeze some base layers of a pre-trained model and then adjust the output layers (also called the classifier layers ) to suit our needs.
+We can customize the outputs of a pre-trained model by changing the output layers to suit our problem. For example, The original `torchvision.models.efficientnet_b0()` comes with output `features of 1000` because there are 1000 classes in ImageNet, the dataset it was trained on. However, for our problem, we might not need that much output, so let's say our problem needs `out_features = 3`. So let's freeze all of the layers parameters in the feature section of our model. Note that to freeze layers means to keep them how they are during training. For example, if our model has pre-trained layers, to freeze them would be like saying, "don't change any of the patterns in these layers during training. Leave them how they are." We can freeze all of the layers parameters in the features section by setting the attribute `requires_grad = False`. For parameters with `requires_grad = False` PyTorch doesn't track gradient updates and in turn, these parameters won't be changed by our optimizer during training.
+
+
+```python
+for params in model_vgg.parameters():
+params.requires_grad = False
+
+```
+
+# Let’s adjust the output layer
+
+Let's now adjust the output layer or the classifier portion of our pre-trained model to our needs. Right now our pre-trained model has `out_features = 1000` because there are 1000 classes in the ImageNet. However we don't have 1000 classes , we only have let's say an out_features of 3 classes , tiger , misty and neither.. we can change the classifier portion of our model by creating a new series of layers. 
+
+```python
+# let's see the model
+print(model_vgg) # has three parts called features == > AdaptiveAvgPool2d == > Classifier
+```
+Output:
+```
+VGG(
+  (features): Sequential(
+    (0): Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (1): ReLU(inplace=True)
+    (2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (3): ReLU(inplace=True)
+    (4): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+    (5): Conv2d(64, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (6): ReLU(inplace=True)
+    (7): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (8): ReLU(inplace=True)
+    (9): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+    (10): Conv2d(128, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (11): ReLU(inplace=True)
+    (12): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (13): ReLU(inplace=True)
+    (14): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (15): ReLU(inplace=True)
+    (16): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+    (17): Conv2d(256, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (18): ReLU(inplace=True)
+    (19): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (20): ReLU(inplace=True)
+    (21): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (22): ReLU(inplace=True)
+    (23): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+    (24): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (25): ReLU(inplace=True)
+    (26): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (27): ReLU(inplace=True)
+    (28): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    (29): ReLU(inplace=True)
+    (30): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  )
+  (avgpool): AdaptiveAvgPool2d(output_size=(7, 7))
+  (classifier): Sequential(
+    (0): Linear(in_features=25088, out_features=4096, bias=True)
+    (1): ReLU()
+    (2): Dropout(p=0.5, inplace=False)
+    (3): Linear(in_features=4096, out_features=4096, bias=True)
+    (4): ReLU()
+    (5): Dropout(p=0.5, inplace=False)
+    (6): Sequential(
+      (0): Linear(in_features=4096, out_features=3, bias=True)
+    )
+  )
+)
+```
+
+```python
+print(model_vgg.classifier[6])
+```
+
+```
+Sequential(
+  (0): Linear(in_features=4096, out_features=3, bias=True)
+)
+
+```
+# Recreate the classifier layer , should be on the same device as our model
+```python
+import torch
+out_features = 3
+model_vgg.classifier[6] = torch.nn.Sequential(
+    torch.nn.Linear(in_features = 4096 , out_features = out_features , bias = True)
+).to(torch.device("cuda"))
+```
+# Getting the summary of our model
+
+```python
+from torchsummary import summary
+summary(model = model_vgg , input_size = (3 , 32 , 32) , batch_size = 64 , device = "cuda")
+
+```
+Output:
+```
+----------------------------------------------------------------
+        Layer (type)               Output Shape         Param #
+================================================================
+            Conv2d-1           [64, 64, 32, 32]           1,792
+              ReLU-2           [64, 64, 32, 32]               0
+            Conv2d-3           [64, 64, 32, 32]          36,928
+              ReLU-4           [64, 64, 32, 32]               0
+         MaxPool2d-5           [64, 64, 16, 16]               0
+            Conv2d-6          [64, 128, 16, 16]          73,856
+              ReLU-7          [64, 128, 16, 16]               0
+            Conv2d-8          [64, 128, 16, 16]         147,584
+              ReLU-9          [64, 128, 16, 16]               0
+        MaxPool2d-10            [64, 128, 8, 8]               0
+           Conv2d-11            [64, 256, 8, 8]         295,168
+             ReLU-12            [64, 256, 8, 8]               0
+           Conv2d-13            [64, 256, 8, 8]         590,080
+             ReLU-14            [64, 256, 8, 8]               0
+           Conv2d-15            [64, 256, 8, 8]         590,080
+             ReLU-16            [64, 256, 8, 8]               0
+        MaxPool2d-17            [64, 256, 4, 4]               0
+           Conv2d-18            [64, 512, 4, 4]       1,180,160
+             ReLU-19            [64, 512, 4, 4]               0
+           Conv2d-20            [64, 512, 4, 4]       2,359,808
+             ReLU-21            [64, 512, 4, 4]               0
+           Conv2d-22            [64, 512, 4, 4]       2,359,808
+             ReLU-23            [64, 512, 4, 4]               0
+        MaxPool2d-24            [64, 512, 2, 2]               0
+           Conv2d-25            [64, 512, 2, 2]       2,359,808
+             ReLU-26            [64, 512, 2, 2]               0
+           Conv2d-27            [64, 512, 2, 2]       2,359,808
+             ReLU-28            [64, 512, 2, 2]               0
+           Conv2d-29            [64, 512, 2, 2]       2,359,808
+             ReLU-30            [64, 512, 2, 2]               0
+        MaxPool2d-31            [64, 512, 1, 1]               0
+AdaptiveAvgPool2d-32            [64, 512, 7, 7]               0
+           Linear-33                 [64, 4096]     102,764,544
+             ReLU-34                 [64, 4096]               0
+          Dropout-35                 [64, 4096]               0
+           Linear-36                 [64, 4096]      16,781,312
+             ReLU-37                 [64, 4096]               0
+          Dropout-38                 [64, 4096]               0
+           Linear-39                 [64, 1000]          12,291
+================================================================
+Total params: 134,272,835
+Trainable params: 12,291
+Non-trainable params: 134,260,544
+----------------------------------------------------------------
+Input size (MB): 0.75
+Forward/backward pass size (MB): 309.50
+Params size (MB): 512.21
+Estimated Total Size (MB): 822.46
+----------------------------------------------------------------
+```
