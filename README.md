@@ -156,7 +156,7 @@ model_vision_transformer = torchvision.models.VisionTransformer
 model_vision_transformer
 ```
 
-# Getting a summary of our model 
+## Getting a summary of our model 
 
 ```python
 import torch
@@ -234,12 +234,12 @@ for params in model_vgg.parameters():
 params.requires_grad = False
 
 ```
-## Summarizing after freezing
+## Summarize after freezing
 ```python
 from torchsummary import summary
 summary(model = model_vgg , input_size = (3 , 32 , 32) , batch_size = 64 , device = "cuda")
 ```
-
+```
 ----------------------------------------------------------------
         Layer (type)               Output Shape         Param #
 ================================================================
@@ -292,7 +292,7 @@ Forward/backward pass size (MB): 309.99
 Params size (MB): 527.79
 Estimated Total Size (MB): 838.53
 ----------------------------------------------------------------
-
+```
 
 ## Adjusting the output layer
 
@@ -498,6 +498,7 @@ for params in model_vgg.classifier[3:].parameters():
 from torchsummary import summary
 summary(model = model_vgg , input_size = (3 , 32 , 32) , batch_size = 64 , device = "cuda")
 ```
+```
 ----------------------------------------------------------------
         Layer (type)               Output Shape         Param #
 ================================================================
@@ -550,18 +551,20 @@ Forward/backward pass size (MB): 309.50
 Params size (MB): 512.21
 Estimated Total Size (MB): 822.46
 ----------------------------------------------------------------
+```
 
-# Retrain the entire layer
+## Retrain the entire layer
 
 ```python
 for params in model_vgg.parameters():
   requires_grad = True
 ```
-# summarize the model after retraining the entire layer
+## Summarize the model after retraining the entire layer
 
 ```python
 from torchsummary import summary
 summary(model =  model_vgg , input_size = (3 , 32 , 32) , batch_size = 64 , device = "cuda")
+```
 ```
 ----------------------------------------------------------------
         Layer (type)               Output Shape         Param #
@@ -615,6 +618,7 @@ Forward/backward pass size (MB): 309.50
 Params size (MB): 512.21
 Estimated Total Size (MB): 822.46
 ----------------------------------------------------------------
+```
 
 ## Sample Image Classification using transfer learning
 ```python
@@ -672,4 +676,8 @@ def predict_image(img , model):
 highest_probability_class = predict_image(img = Normalized_image , model = model_alexnet)
 print("The predicted image is = {}".format(highest_probability_class))
 
+```
+Output:
+```
+The predicted image is = tensor([475], device='cuda:0')
 ```
