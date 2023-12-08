@@ -1,4 +1,3 @@
-# Pre-training-and-Fine-Tuning-with-PyTorch
 
 **Transfer learning** is a powerful technique in machine learning where we apply knowledge gained from solving one problem to a different but related problem. Imagine it like this: rather than starting from scratch every time, we use the insights and lessons learned from a model that was trained on a large and comprehensive dataset, and apply them to our specific task. For instance, we could take a model that has been trained to recognize a myriad of objects in millions of images, such as those from the ImageNet dataset, and use that knowledge to boost our own image-related project. Similarly, in the world of text and language, a model that has been fed vast amounts of text to understand and interpret language can be repurposed to help classify different text samples in our own work. This approach is like standing on the shoulders of giants – we leverage the hard work and learning a model has already done, and use it to give our project a head start. The key idea is to find a model that excels in a certain area and adapt its strengths to our unique challenges, thereby enhancing the performance and efficiency of our own model.
 
@@ -224,6 +223,9 @@ Estimated Total Size (MB): 838.53
 ----------------------------------------------------------------
 
 ```
+
+The model summary describes the architecture of a VGG16 neural network model. The input size to the model is specified as 3 x 32 x 32, which suggests that the images that the model processes should have a depth of 3, with a spatial resolution of 32x32 pixels.The output from the model is [64, 1000], which indicates that for each instance in the batch, the network outputs a vector of 1000 elements. This typically corresponds to the number of classes the model is predicting.Regarding parameters, the model has a total of 138,357,544 parameters, all of which are trainable as indicated by the same number being listed under trainable parameters. There are no non-trainable parameters in this network, as by default the parameters `requires_grad is True`.
+
 ## Freezing the model
 
 The process of transfer learning usually goes: freeze some base layers of a pre-trained model and then adjust the output layers (also called the classifier layers ) to suit our needs.We can customize the outputs of a pre-trained model by changing the output layers to suit our problem. For example, The original `torchvision.models.efficientnet_b0()` comes with output `features of 1000` because there are 1000 classes in ImageNet, the dataset it was trained on. However, for our problem, we might not need that much output, so let's say our problem needs `out_features = 3`. So let's freeze all of the layers parameters in the feature section of our model. Note that to freeze layers means to keep them how they are during training. For example, if our model has pre-trained layers, to freeze them would be like saying, "don't change any of the patterns in these layers during training. Leave them how they are." We can freeze all of the layers parameters in the features section by setting the attribute `requires_grad = False`. For parameters with `requires_grad = False` PyTorch doesn't track gradient updates and in turn, these parameters won't be changed by our optimizer during training.
@@ -380,43 +382,6 @@ summary(model = model_vgg , input_size = (3 , 32 , 32) , batch_size = 64 , devic
 ```
 Output:
 
-
-## Training the weights of the last few layers 
-
-```python
-print(model_vgg.classifier[3])
-```
-`Linear(in_features=4096, out_features=4096, bias=True)`
-
-```python
-for params in model_vgg.classifier[3].parameters():
-  params.requires_grad = True
-```
-
-```python
-print(model_vgg.classifier[6])
-```
-
-```
-Sequential(
-  (0): Linear(in_features=4096, out_features=3, bias=True)
-)
-```
-## Recreate the classifier layer
-
-```python
-import torch
-out_features = 3
-model_vgg.classifier[6] = torch.nn.Sequential(
-    torch.nn.Linear(in_features = 4096 , out_features = out_features , bias = True)
-).to(torch.device("cuda"))
-```
-## Summarizing after the recreated classifier layer
-```python
-from torchsummary import summary
-summary(model = model_vgg , input_size = (3 , 32 , 32) , batch_size = 64 , device = "cuda")
-```
-
 ```
 ----------------------------------------------------------------
         Layer (type)               Output Shape         Param #
@@ -470,7 +435,9 @@ Forward/backward pass size (MB): 309.50
 Params size (MB): 512.21
 Estimated Total Size (MB): 822.46
 ----------------------------------------------------------------
+
 ```
+
 ## Training the weights of the last few layers 
 
 ```python
